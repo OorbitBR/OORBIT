@@ -79,6 +79,7 @@ function loadGroup(m, iat, callback){
         multi = true;
         var script = document.createElement('script');
         script.type = 'text/javascript';
+        //TODO
         script.src = "../_js/o-group.js";
         
         //script.onreadystatechange = callback;
