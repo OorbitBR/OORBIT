@@ -1,4 +1,4 @@
-/*OORBIT
+/*OORBITfunction
 added schema shadowDressing, stageSize,groundDetail
 removed console.log(this.environmentData)
 removed dumpParametersDiff call
@@ -245,23 +245,31 @@ rewrote createStars() and setStars()
           this.gridCanvas = null;
           this.gridTexture = null;
   
+          // OORBIT 1.4.3
           // create lights (one ambient hemisphere light, and one directional for the sun)
-          this.hemilight = document.createElement('a-entity');
+
+          //s.ambientLight = document.createElement('a-entity');
+          //s.directionalLight = document.createElement('a-entity');
+          //s.hemisphereLight = document.createElement('a-entity');
+
+          this.hemilight = o.hemisphereLight || document.createElement('a-entity');
           this.hemilight.classList.add('environment');
-          this.hemilight.setAttribute('position', '0 50 0');
+          this.hemilight.setAttribute('position', '0 0 0');
           this.hemilight.setAttribute('light', {
             type: 'hemisphere',
             color: '#CEE4F0',
             intensity: (this.intensity || 0.4) /* OORBIT 1.3.1 */
           });
-          this.sunlight = document.createElement('a-entity');
+
+          this.sunlight = o.directionalLight || document.createElement('a-entity');
           this.sunlight.classList.add('environment');
           this.sunlight.setAttribute('position', this.data.lightPosition);
           this.sunlight.setAttribute('light', {intensity: (this.intensity || 0.6) /* OORBIT 1.3.1 */});
           
           // add everything to the scene
-          this.el.appendChild(this.hemilight);
-          this.el.appendChild(this.sunlight);
+          if (!o.hemisphereLight && o.data.lightType != 'none') this.el.appendChild(this.hemilight);
+          if (!o.directionalLight && o.data.lightType != 'none') this.el.appendChild(this.sunlight);
+          
           this.el.appendChild(this.ground);
           this.el.appendChild(this.dressing);
           this.el.appendChild(this.sky);
@@ -336,11 +344,11 @@ rewrote createStars() and setStars()
               skycol.g = (skycol.g + 1.0) / 2.0;
               skycol.b = (skycol.b + 1.0) / 2.0;
               this.hemilight.setAttribute('light', {'color': '#' + skycol.getHexString()});
-            this.sunlight.setAttribute('light', {'intensity': this.intensity /* OORBIT 1.3.1 */});
+              this.sunlight.setAttribute('light', {'intensity': this.intensity /* OORBIT 1.3.1 */});
               this.hemilight.setAttribute('light', {'intensity': this.intensity /* OORBIT 1.3.1 */});
             }
             else {
-              this.sunlight.setAttribute('light', {'intensity': (.1 + this.intensity * sunPos.y * ((sunPos.y < 0) ? 0 : 1)) /* OORBIT 1.3.1 */});
+              this.sunlight.setAttribute('light', {'intensity': (.1 + this.intensity * sunPos.y) * ((sunPos.y < 0) ? 0 : 1) /* OORBIT 1.3.1 */});
               this.hemilight.setAttribute('light', {'intensity': (.1 + this.intensity * sunPos.y * ((sunPos.y < 0) ? 0 : 1)) /* OORBIT 1.3.1 */});
             }
   
@@ -371,13 +379,18 @@ rewrote createStars() and setStars()
               mat.topColor = this.environmentData.skyColor;
               mat.bottomColor = this.environmentData.horizonColor;
             }
-  
             this.sky.setAttribute('material', mat);
           }
   
+          // OORBIT
           // set atmosphere sun position and stars
           if (skyType == 'atmosphere') {
-            this.sky.setAttribute('material', {'sunPosition': sunPos});
+            if (!environment.background) {
+              this.sky.setAttribute('material', {
+                shader: 'skyshader',
+                sunPosition: sunPos
+              });
+            }
             this.setStars((1 - Math.max(0, (sunPos.y + 0.08) * 8)) * 2000 );
           }
   
@@ -463,12 +476,15 @@ rewrote createStars() and setStars()
           return parseFloat('0.' + Math.sin(this.environmentData.seed * 9999 * x).toString().substr(7));
         },
   
-  
         // updates ground attributes, and geometry if required
         updateGround: function (updateGeometry) {
   
-          var resolution = 64; // number of divisions of the ground mesh
-  
+          //var resolution = 64; // number of divisions of the ground mesh
+            
+          // OORBIT 1.3.2
+          var resolution = this.environmentData.groundDetail;
+          //####//
+            
           if (updateGeometry) {
             var visibleground = this.environmentData.ground != 'none';
             this.ground.setAttribute('visible', visibleground);
@@ -848,9 +864,11 @@ rewrote createStars() and setStars()
           }
           return geoset;
         },
-  
+
+        // OORBIT
         // updates set dressing
         updateDressing: function () {
+          if (!this.environmentData.dressingAmount) return
           var dressing = new THREE.Object3D();
           var geometries = [];
           this.dressing.setAttribute('visible', this.environmentData.dressing != 'none');
@@ -1004,7 +1022,7 @@ rewrote createStars() and setStars()
           mieCoefficient: { type: 'number', default: 0.005, min: 0, max: 0.1, is: 'uniform' },
           mieDirectionalG: { type: 'number', default: 0.8, min: 0, max: 1, is: 'uniform' },
           sunPosition: { type: 'vec3', default: {x: 0, y: 0, z: -1}, is: 'uniform' },
-          color: {type: 'color', default: '#fff'} //placeholder to remove warning
+          color: {type: 'color', default: '#fff', is: 'uniform' } //placeholder to remove warning
         },
   
         vertexShader: [
@@ -1189,7 +1207,8 @@ rewrote createStars() and setStars()
       AFRAME.registerShader('gradientshader', {
         schema: {
           topColor: {type: 'color', default: '1 0 0', is: 'uniform'},
-          bottomColor: {type: 'color', default: '0 0 1', is: 'uniform'}
+          bottomColor: {type: 'color', default: '0 0 1', is: 'uniform'},
+          color: {type: 'color', default: '#fff', is: 'uniform' } //placeholder to remove warning
         },
   
         vertexShader: [

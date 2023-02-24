@@ -1,8 +1,20 @@
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+var multi;
+var token = urlParams.get('a');
+var iat = urlParams.get('b');
+var mode = urlParams.get('c'); 
+var pass = urlParams.get('d');
+if (dev){
+    mode = CONFIG.mode; 
+    pass = CONFIG.pass;    
+}
+
 var spre =  "../../_js/";
 var ssuf =  ".js";
 var git = "https://cdn.jsdelivr.net/gh/OorbitBR/OORBIT@";
 if (!dev) spre = git+version.OORBIT+"/builds/";
-if (version.min) ssuf =  "-min.js";
+if (version.min) ssuf =  ".min.js";
 function headScript() {
     var src = arr[0];
     var scriptEl = document.createElement("script");
@@ -10,21 +22,22 @@ function headScript() {
     arr.shift();
     //scriptEl.onreadystatechange = headScript(arr);
     scriptEl.onload = ()=>{
-        console.log('loaded',src);
-        (src.includes('oorbit')) ? loadGroup((dev)?CONFIG.mode:mode,iat,progress) : headScript(arr);       
+        if (dev) console.log('loaded',src);
+        (src.includes('oorbit')) ? loadGroup(mode,iat,progress) : headScript(arr);       
     }
     document.head.appendChild(scriptEl);
 }
 
 var arr = []
-if (version.ARCARD) {
+var bc = mode.slice(-2);
+if (bc == 85 || bc == 86) {
 
     arr.push('https://cdn.jsdelivr.net/npm/mind-ar@'+version.ARCARD+'/dist/mindar-image.prod.js');
     arr.push(spre+'aframe-v'+version.AFRAME+ssuf);
     arr.push('https://cdn.jsdelivr.net/npm/mind-ar@'+version.ARCARD+'/dist/mindar-image-aframe.prod.js');
 
 } 
-else if (version.ARFACE) {
+else if (bc == 87 || bc == 88) {
 
     arr.push('https://cdn.jsdelivr.net/npm/mind-ar@'+version.ARCARD+'/dist/mindar-face.prod.js');
     arr.push(spre+'aframe-v'+version.AFRAME+ssuf);
@@ -35,10 +48,11 @@ else {
     arr.push(spre+'aframe-v'+version.AFRAME+ssuf);
 }
 
-if (version.ARPLACE) {
+if (bc == 83 || bc == 84) {
     arr.push('https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@'+version.ARPLACE+'/three.js/build/ar-threex-location-only.js');
     arr.push('https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@'+version.ARPLACE+'/aframe/build/aframe-ar-new-location-only.js');
 }
+//TODO: AR 81 E 82
 
 arr.push("https://cdn.jsdelivr.net/npm/aframe-troika-text@"+version.TEXT+"/dist/aframe-troika-text.min.js") //text component
 arr.push(spre+'environment-v'+version.ENVIRONMENT+ssuf); // environment
@@ -57,17 +71,12 @@ var physxwasm = spre+'physx-v'+version.PHYSX+'.wasm';
 
 //headScript("https://cdn.jsdelivr.net/npm/three-pathfinding@1.1.0/dist/three-pathfinding.umd.js"); // AWS
 
-arr.push(spre+'components-a'+version.AFRAME+ssuf);
-arr.push(spre+'oorbit-a'+version.AFRAME+ssuf);
-headScript()
+arr.push("https://cdn.jsdelivr.net/gh/faisalman/ua-parser-js@"+version.UAPARSER+"/dist/ua-parser.min.js"); // ua parser
 
-const queryString = window.location.search;
-const urlParams = new URLSearchParams(queryString);
-let multi;
-let token = urlParams.get('a');
-let pass = urlParams.get('d');
-let iat = urlParams.get('b');
-let mode = urlParams.get('c');           
+arr.push('../_js/'+'components-a'+version.AFRAME+ssuf);
+arr.push('../_js/'+'oorbit-a'+version.AFRAME+ssuf);
+headScript()
+     
 function loadGroup(m, iat, callback){
     if (iat == 'GOOG' || iat == 'FACE' || iat == 'COGI') return
         
@@ -87,6 +96,7 @@ function loadGroup(m, iat, callback){
         
         documentHead.appendChild(script);
     } else {
+        pass = true;
         progress()
     }
 }
@@ -98,7 +108,10 @@ let medias = {
     audio:false,
     video:false
 };
-let userType = 'userX';
+let userType = 'user';
+
+var opath = "https://c6cimdp8rg.execute-api.us-east-1.amazonaws.com/";
+var s3path = "https://aulas-oorbit-svls.s3.amazonaws.com/";
 
 function progress () {
     if (!AFRAME || !AFRAME.components["super-hands"] || !AFRAME.components.environment || !AFRAME.systems.physx) {
@@ -113,44 +126,35 @@ function progress () {
 };       
 function getWorld(){                
     if (!dev && (!token || token=='' || !iat || iat=='' || !mode || mode=='' || !pass || pass=='')) errorHandler();
-    
-    /*
-    https://oorbit.com.br/estudar/salav.html?
-        a=orb97-001EducationLab&
-        b=COGI&
-        c=us-east-1:6acd9739-ef76-4967-8314-5d0eaa85071e&
-        d=educationlab
-    */
+
     $.ajaxSetup({contentType: "application/json; charset=utf-8"});
     if (iat == 'GOOG' || iat == 'FACE' || iat == 'COGI') {
-        if (document.referrer.indexOf(pass) > -1 || mode == identityId) {
+        if (document.referrer.indexOf(pass) > -1 || mode == AWS.config.credentials.identityId) {
             $.post(opath+"getview",JSON.stringify({
                 a:token,
                 b:iat,
                 c:mode,
                 d:pass
             }),function(data){
-                showWorld(data)
+                showWorld(data.params)
                 $.get(data.file, function(result) {
                     appendImport(result)
-                    //$('body').append($(result));
                     if (localStorage.getItem('res') != null ) updateRes(data.viat);
                 }).fail(function(err) {
                     errorHandler(err)});
             }).fail(function(err) {
                 errorHandler(err)});
         } else {
-            errorHandler()
+            errorHandler("view")
         }  
     } 
     else {
         if (!dev) {
             url = opath+"getfile/"+token+iat;
             $.get(url, function(data){
-                showWorld(data)
+                showWorld(data.params)
                 $.get(data.file, function(result) {
                     appendImport(result)
-                    //$('body').append($(result));
                     if (localStorage.getItem('res') != null ) updateRes(data.viat);
                 }).fail(function(err) {
                     errorHandler(err)});
@@ -159,7 +163,7 @@ function getWorld(){
             });
         } 
         else {
-            $.get(CONFIG.url, function(result) {
+            $.get('../'+CONFIG.mod+'/'+CONFIG.mod+'.html', function(result) {
                 showWorld(CONFIG)
                 appendImport(result)
             }).fail(function(err) {
@@ -205,9 +209,10 @@ function errorHandler(err){
     if (err == "slow") msg = "01: Problema de conexão com a internet."; 
     else if(err == "socket") msg = "02: Conexão indisponível."; 
     else if(err == "ar") msg = "03: Sistema AR não carregou."; 
+    else if(err == "view") msg = "12: Visualização bloqueada."; 
     
     else if (err != null && err.responseJSON != null) msg = err.responseJSON.message;
-    (msg == "Internal Server Error") ? msg = "E12: Servidor em Manutenção." : msg = "E"+msg;
+    (msg == "Internal Server Error") ? msg = "E99: Servidor em Manutenção." : msg = "E"+msg;
                     
     $('#logo').css('opacity',1)
     $('#logo').css('top',40)
