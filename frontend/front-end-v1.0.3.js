@@ -14,7 +14,7 @@ var spre =  "../../_js/";
 var ssuf =  ".js";
 var git = "https://cdn.jsdelivr.net/gh/OorbitBR/OORBIT@";
 if (!dev) spre = git+version.OORBIT+"/builds/";
-if (version.min) ssuf =  ".min.js";
+if (version.min) ssuf =  "-min.js";
 function headScript() {
     var src = arr[0];
     var scriptEl = document.createElement("script");
@@ -73,8 +73,8 @@ var physxwasm = spre+'physx-v'+version.PHYSX+'.wasm';
 
 arr.push("https://cdn.jsdelivr.net/gh/faisalman/ua-parser-js@"+version.UAPARSER+"/dist/ua-parser.min.js"); // ua parser
 
-arr.push('../_js/'+'components-a'+version.AFRAME+ssuf);
-arr.push('../_js/'+'oorbit-a'+version.AFRAME+ssuf);
+arr.push(spre+'components-a'+version.AFRAME+ssuf);
+arr.push(spre+'oorbit-a'+version.AFRAME+ssuf);
 headScript()
      
 function loadGroup(m, iat, callback){
@@ -128,7 +128,7 @@ function getWorld(){
     if (!dev && (!token || token=='' || !iat || iat=='' || !mode || mode=='' || !pass || pass=='')) errorHandler();
 
     $.ajaxSetup({contentType: "application/json; charset=utf-8"});
-    if (iat == 'GOOG' || iat == 'FACE' || iat == 'COGI') {
+    if (iat == 'GOOG' || iat == 'FACE' || iat == 'COG1' || iat == 'COG2') {
         if (document.referrer.indexOf(pass) > -1 || mode == AWS.config.credentials.identityId) {
             $.post(opath+"getview",JSON.stringify({
                 a:token,
