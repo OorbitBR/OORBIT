@@ -1,0 +1,292 @@
+<script>  
+    // SPECIFIC
+    var modName = "Nome";
+    var clone = ""
+    var version = "1.0";
+
+    // ASSETS
+    var assets = {
+        models: {
+            model: 'default_l_3k.js'
+        },
+        audios:{},
+        videos:{},
+        minds:{},
+        imgs:{
+            rio: 'rio-2k-opt.jpg',
+        },
+        lmaps:{},
+    }    
+
+    var environment = {
+        active: true,
+	    preset: 'none',
+	    skyType: 'atmosphere',
+        stageSize:150,
+        skyDetail:32,
+        stars:1000,
+        econtrol: {
+            cycleDuration: 0,
+            hour: 11,
+            intensity: 1,
+            //sumbias: 0.002,
+            hasMoon: false,
+            skyradius: 1000,
+            universe: true,
+            ucolor: "#493889",
+            upct: 0.6,
+            weather: 'none',
+            hoverable: false,
+            groundPhysics: false,
+            enabled: true,
+            nonstop: false 
+        },
+    } 
+    
+    //var variable
+    //function
+    
+    AFRAME.registerComponent('droplisten', {
+        init: function(){
+            this.points = Array.from(this.el.sceneEl.querySelectorAll("a-cp, [cp]"));  
+            
+            this.initialPosition = new THREE.Vector3().copy(this.el.object3D.position)
+            this.initialRotation = new THREE.Euler().copy(this.el.object3D.rotation)
+        },
+        events:{
+            'dragover-start': function(){
+                console.log('hover')
+            },
+            'drag-drop': function(e){
+                let pos = new THREE.Vector3()
+                let min = 10000;
+                let index;
+                let index2;   
+                
+                for (let i=0;i<this.points.length;i++){
+                    this.points[i].object3D.getWorldPosition(pos) 
+                    let dist = pos.distanceTo(e.detail.dropped.object3D.position)
+                    if ( dist < min){
+                        min = dist;
+                        index = i;
+                        index2 = Array.prototype.indexOf.call(this.points[i].parentNode.children, this.points[i]);
+                    }
+                } 
+                
+                //pos.copy(this.points[index].object3D.position)
+                //this.points[index].object3D.getWorldPosition(pos) 
+                //e.detail.dropped.object3D.position.copy(pos)
+                
+                let step = 1/ (this.points[index].parentElement.querySelectorAll('a-cp').length-1) * (index2)
+
+                // calculate path
+                let arr;
+                switch (this.points[index].parentElement.id) {
+                    case 'river1':{
+                        arr = ['#river1']
+                        break
+                    }
+                    case 'river2':{
+                        arr = ['#river2','#river1']
+                        break
+                    }
+                    case 'river3':{
+                        arr = ['#river3','#river1']
+                        break
+                    }
+                    case 'river4':{
+                        arr = ['#river4','#river1']
+                        break
+                    }
+                    default:
+                }
+                
+                e.detail.dropped.setAttribute('alongpath',{
+                    path: arr,
+                    interval: step,
+                    dur: 10000,
+                    speed: 1,
+                    rotate: false,
+                    loop: false,
+                    relative: true,
+                })
+            },
+            'grab-start': function(){
+                this.el.removeAttribute('alongpath')     
+            },
+            movingended: function(){
+                this.el.removeAttribute('alongpath') 
+                this.el.object3D.position.copy(this.initialPosition)
+                this.el.object3D.rotation.copy(this.initialRotation)
+            }
+            //event-set__dragover-start="material.color: yellow"
+            //event-set__dragover-end="material.color: black"   
+            //event-set__drag-drop="material.color: lightgreen"
+        }
+    })
+    
+    var timeline = {
+        pre:()=>{
+            if (dev) console.log('pre') 
+            variable = false;
+        },
+        ini:()=>{
+            if (dev) console.log('ini')
+            //variable = $('#planeta')[0];
+            //audio = $('#audio')[0];
+            //audio.setAttribute('main-audio','') 
+            o.hemisphereLight.setAttribute('light','intensity',1.2)
+        },
+        play:()=>{
+            if (dev) console.log('play')
+            //audio.play()
+        },
+        '4.0':()=>{
+            //createText('text1','Camadas da Terra',5)
+        },
+        '5.0':()=>{
+            return true
+        },
+    }
+    
+    var questions = [       
+        ['Quantas partes tem o manto da Terra?',
+            'a)  Uma',
+            'xb)  Duas',
+            'c)  Três',
+            'd)  Quatro'
+        ],
+        ['Qual a camada mais interna da Terra?',
+            'xa)  Núcleo',
+            'b)  Crosta',
+            'c)  Manto Superior',
+            'd)  Manto Inferior'
+        ],
+        ['Em qual camada nós vivemos?',
+            'a)  Núcleo',
+            'b)  Troposfera',
+            'xc)  Crosta',
+            'd)  Manto'
+        ],
+        ['O que você achou da aula?',
+            'Muito legal!',
+            'Legal!',
+            'Chata.',
+            'Não consegui ver.',
+            'entry.1432716078'
+        ],
+        ['Você indiciaria a Oorbit como uma boa ferramenta de ensino?',
+            'Com certeza!',
+            'Sim',
+            'Não',
+            'entry.129871436'
+        ]
+    ];
+    form = 'https://docs.google.com/forms/d/e/1FAIpQLSfObjAenG7a1pynJ4qJyx_IGJE7zU9908VATTg6twOD1Ozwsg/formResponse';
+
+</script>
+<a-scene  
+    gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.4.3/"     
+    renderer="
+        antialias: true; 
+        colorManagement: true;
+        highRefreshRate: false;
+        foveationLevel: 1;       
+        physicallyCorrectLights: false;       
+        alpha:true;
+        toneMapping: reinhard;     
+        exposure:1;"        
+    inspector="url: xxx"
+    shadow="autoUpdate: true; enabled:true; type: pcfsoft"        
+    > 
+
+    <a-entity id="dim3" boombox>
+        
+        <!--<a-entity gltf-model="#room" shadow="cast: true; receive: true;" scale="10 5 10" position="0 -0.01 0"></a-entity>-->
+        
+        <a-image src="#rio" height="1" width="2" position="0 1.2 -0.5" rotation="-30 0 0"    
+            droppable                            
+        >
+            <a-entity gltf-submodel="src:#model; part:cristo;" scale="0.003 0.003 0.003" position="-0.15 0.44 0"></a-entity>
+            
+            <a-entity troika-text="value: Ipanema;fontSize:0.03; color:black" position="0.77 -0.43 0.007" rotation="0 0 16"></a-entity>
+            
+            <a-entity troika-text="value: Canal do Jardim de Alah;fontSize:0.03; color:black" position="0.7 -0.25 0.014" rotation="0 0 16"></a-entity>
+            
+            <a-entity troika-text="value: Lagoa Rodrigo de Freitas;fontSize:0.02; color:white" position="0.21 0.06 0.006" rotation="0 0 -40"></a-entity>
+            
+            <a-entity troika-text="value: Parque Nacional da Tijuca;fontSize:0.02; color:black" position="-0.43 0.39 0.019" rotation="0 0 14"></a-entity>
+            
+            <a-entity troika-text="value: Rio Cabeça;fontSize:0.02; color:white" position="-0.068 0.32 0.005" rotation="0 0 0"></a-entity>
+            
+            <a-entity troika-text="value: Rio dos Macacos;fontSize:0.02; color:white" position="-0.81 0.11 0.005" rotation="0 0 0"></a-entity>
+            
+            <a-entity troika-text="value: Rio Rainha;fontSize:0.02; color:white" position="-0.77 -0.17 0.005" rotation="0 0 6"></a-entity>
+            
+            <a-spline id="river1" spline="closed:false; color: LightBlue; showLine: true; thickness: 2; debugcps: false">
+                
+                <a-cp position="-0.14 0.1 0.002" prop="speed:3"></a-cp>
+                <a-cp position="0.12 0.09 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="0.25 -0.01 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="0.42 -0.23 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="0.68 -0.40 0.002" prop="steer2:0"></a-cp>
+                
+            </a-spline>
+            
+            <a-spline id="river2" spline="closed:false; color: LightBlue; showLine: true; thickness: 2; debugcps: false">
+                
+                <a-cp position="-0.16 0.4 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.2 0.25 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.11 0.17 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.14 0.1 0.002" prop="speed:3"></a-cp>
+                
+            </a-spline>
+            
+            <a-spline id="river3" spline="closed:false; color: LightBlue; showLine: true; thickness: 2; debugcps: false">
+                
+                <a-cp position="-0.78 0.19 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.6 0.1 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.41 0.07 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.33 0.13 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.23 0.1 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.14 0.1 0.002" prop="speed:3"></a-cp>
+                
+            </a-spline>
+            
+            <a-spline id="river4" spline="closed:false; color: LightBlue; showLine: true; thickness: 2; debugcps: false">
+                
+                <a-cp position="-0.82 -0.23 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.32 -0.18 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.21 -0.05 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.21 0.02 0.002" prop="steer2:0"></a-cp>
+                <a-cp position="-0.14 0.1 0.002" prop="speed:3"></a-cp>
+                
+            </a-spline>
+
+            
+        </a-image>
+
+        <a-entity gltf-submodel="src:#model; part:barco;" scale="0.5 0.5 0.5" position="0.3 1.2 0" rotation="-30 0 0"
+            grabbable draggable hoverable droplisten
+            event-set__hover-start2="material.color: pink"
+            event-set__hover-end2="material.color: grey"   
+            event-set__grab-start="material.color: aqua"
+            event-set__grab-end="material.color: blue"
+                  >
+        </a-entity>
+        
+        <a-entity gltf-submodel="src:#model; part:bola;" scale="0.3 0.3 0.3" position="0.15 1.2 0" grabbable draggable hoverable droplisten>
+        </a-entity>
+        
+        <a-entity gltf-submodel="src:#model; part:caixa;" scale="0.3 0.3 0.3" position="-0.10 1.2 0" rotation="0 90 0" grabbable draggable hoverable droplisten>
+        </a-entity>
+        
+        <a-entity gltf-submodel="src:#model; part:garrafa;" scale="0.3 0.3 0.3" position="-0.3 1.2 0" grabbable draggable hoverable droplisten>
+        </a-entity>
+                
+    </a-entity>
+        
+    <a-entity id="cameraRig" position="0 0 0" rotation="0 0 0">
+        <a-camera id="camera"></a-camera>
+    </a-entity>
+</a-scene>
