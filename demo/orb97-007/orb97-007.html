@@ -104,12 +104,23 @@
                 e.detail.dropped.setAttribute('alongpath',{
                     path: arr,
                     interval: step,
-                    dur: 10000,
+                    dur: 15000,
                     speed: 1,
                     rotate: false,
                     loop: false,
                     relative: true,
                 })
+                $('[grabbable]').each(function(){
+                    if($(this)[0] != e.detail.dropped) $(this)[0].object3D.visible = false;
+                })
+                
+                // hide rivers
+                //$('#river1')[0].object3D.visible = false;
+                //$('#river2')[0].object3D.visible = false;
+                //$('#river3')[0].object3D.visible = false;
+                //$('#river4')[0].object3D.visible = false;
+                
+                $('#main')[0].emit('grow')
             },
             'grab-start': function(){
                 this.el.removeAttribute('alongpath')     
@@ -118,6 +129,18 @@
                 this.el.removeAttribute('alongpath') 
                 this.el.object3D.position.copy(this.initialPosition)
                 this.el.object3D.rotation.copy(this.initialRotation)
+                
+                //$('#river1')[0].object3D.visible = true;
+                //$('#river2')[0].object3D.visible = true;
+                //$('#river3')[0].object3D.visible = true;
+                //$('#river4')[0].object3D.visible = true;
+                $('#main')[0].emit('shrink')
+                
+                setTimeout(function(){
+                    $('[grabbable]').each(function(){
+                        $(this)[0].object3D.visible = true;
+                    })    
+                },1000)
             }
             //event-set__dragover-start="material.color: yellow"
             //event-set__dragover-end="material.color: black"   
@@ -204,8 +227,10 @@
         
         <!--<a-entity gltf-model="#room" shadow="cast: true; receive: true;" scale="10 5 10" position="0 -0.01 0"></a-entity>-->
         
-        <a-image src="#rio" height="1" width="2" position="0 1.2 -0.5" rotation="-30 0 0"    
-            droppable                            
+        <a-image id="main" src="#rio" height="1" width="2" position="0 1.2 -1" rotation="-30 0 0"    
+            droppable
+            animation__grow="property:scale;from:1 1 1; to: 1.8 1.8 1.8; easing: linear; dur: 1000; startEvents: grow"
+            animation__shrink="property:scale;from:1.8 1.8 1.8; to: 1 1 1; easing: linear; dur: 1000; startEvents: shrink"
         >
             <a-entity gltf-submodel="src:#model; part:cristo;" scale="0.003 0.003 0.003" position="-0.15 0.44 0"></a-entity>
             
@@ -213,7 +238,7 @@
             
             <a-entity troika-text="value: Canal do Jardim de Alah;fontSize:0.03; color:black" position="0.7 -0.25 0.014" rotation="0 0 16"></a-entity>
             
-            <a-entity troika-text="value: Lagoa Rodrigo de Freitas;fontSize:0.02; color:white" position="0.21 0.06 0.006" rotation="0 0 -40"></a-entity>
+            <a-entity troika-text="value: Lagoa Rodrigo de Freitas;fontSize:0.02; color:white" position="0.25 0.06 0.006" rotation="0 0 -40"></a-entity>
             
             <a-entity troika-text="value: Parque Nacional da Tijuca;fontSize:0.02; color:black" position="-0.43 0.39 0.019" rotation="0 0 14"></a-entity>
             
@@ -266,8 +291,8 @@
             
         </a-image>
 
-        <a-entity gltf-submodel="src:#model; part:barco;" scale="0.5 0.5 0.5" position="0.3 1.2 0" rotation="-30 0 0"
-            grabbable draggable hoverable droplisten
+        <a-entity gltf-submodel="src:#model; part:barco;" scale="0.5 0.5 0.5" position="0.3 1.0 -0.4" rotation="-30 0 0"
+            grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'
             event-set__hover-start2="material.color: pink"
             event-set__hover-end2="material.color: grey"   
             event-set__grab-start="material.color: aqua"
@@ -275,13 +300,13 @@
                   >
         </a-entity>
         
-        <a-entity gltf-submodel="src:#model; part:bola;" scale="0.3 0.3 0.3" position="0.15 1.2 0" grabbable draggable hoverable droplisten>
+        <a-entity gltf-submodel="src:#model; part:bola;" scale="0.3 0.3 0.3" position="0.15 1.0 -0.4" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
         </a-entity>
         
-        <a-entity gltf-submodel="src:#model; part:caixa;" scale="0.3 0.3 0.3" position="-0.10 1.2 0" rotation="0 90 0" grabbable draggable hoverable droplisten>
+        <a-entity gltf-submodel="src:#model; part:caixa;" scale="0.3 0.3 0.3" position="-0.10 1.0 -0.4" rotation="0 90 0" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
         </a-entity>
         
-        <a-entity gltf-submodel="src:#model; part:garrafa;" scale="0.3 0.3 0.3" position="-0.3 1.2 0" grabbable draggable hoverable droplisten>
+        <a-entity gltf-submodel="src:#model; part:garrafa;" scale="0.3 0.3 0.3" position="-0.3 1.0 -0.4" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
         </a-entity>
                 
     </a-entity>
