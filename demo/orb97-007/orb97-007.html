@@ -57,7 +57,11 @@
             'dragover-start': function(){
                 console.log('hover')
             },
+            'grab-end': function(){
+                console.log('teste1')    
+            },
             'drag-drop': function(e){
+                console.log('teste2')
                 let pos = new THREE.Vector3()
                 let min = 10000;
                 let index;
@@ -291,22 +295,18 @@
             
         </a-image>
 
-        <a-entity gltf-submodel="src:#model; part:barco;" scale="0.5 0.5 0.5" position="0.3 1.0 -0.4" rotation="-30 0 0"
+        <a-entity gltf-submodel="src:#model; part:barco;" scale="0.8 0.8 0.8" position="0.3 1.0 -0.4" rotation="-30 0 0"
             grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'
-            event-set__hover-start2="material.color: pink"
-            event-set__hover-end2="material.color: grey"   
-            event-set__grab-start="material.color: aqua"
-            event-set__grab-end="material.color: blue"
-                  >
+        >
         </a-entity>
         
-        <a-entity gltf-submodel="src:#model; part:bola;" scale="0.3 0.3 0.3" position="0.15 1.0 -0.4" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
+        <a-entity gltf-submodel="src:#model; part:bola;" scale="0.6 0.6 0.6" position="0.15 1.0 -0.4" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
         </a-entity>
         
         <a-entity gltf-submodel="src:#model; part:caixa;" scale="0.3 0.3 0.3" position="-0.10 1.0 -0.4" rotation="0 90 0" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
         </a-entity>
         
-        <a-entity gltf-submodel="src:#model; part:garrafa;" scale="0.3 0.3 0.3" position="-0.3 1.0 -0.4" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
+        <a-entity gltf-submodel="src:#model; part:garrafa;" scale="0.6 0.6 0.6" position="-0.3 1.0 -0.4" grabbable pinchable draggable hoverable droplisten physx-body='type:kinematic'>
         </a-entity>
                 
     </a-entity>
